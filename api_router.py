@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from pymongo import AsyncMongoClient
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 
 router = APIRouter(prefix="/api")
 mongo = AsyncMongoClient("mongodb://localhost:27017")
@@ -30,6 +31,6 @@ async def get_client_counts():
         { "$sort": { "hour": 1 } }
     ]
 
-    cursor = collection.aggregate(pipeline)
+    cursor = await collection.aggregate(pipeline)
     results = [doc async for doc in cursor]
-    return JSONResponse(content=results)
+    return JSONResponse(content=jsonable_encoder(results))
