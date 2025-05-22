@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 from pydantic import BaseModel
-from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import AsyncMongoClient
 from typing import List
 from datetime import datetime
