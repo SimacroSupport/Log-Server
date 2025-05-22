@@ -1,8 +1,7 @@
 from fastapi import APIRouter
 from pymongo import AsyncMongoClient
 from fastapi import APIRouter
-from fastapi.responses import JSONResponse
-from fastapi.encoders import jsonable_encoder
+from datetime import datetime
 
 router = APIRouter(prefix="/api")
 mongo = AsyncMongoClient("mongodb://localhost:27017")
@@ -31,5 +30,8 @@ async def get_widget_usage():
     results = [doc async for doc in cursor]
     for doc in results:
         doc.pop("_id", None)  # 안전하게 제거
+        if isinstance(doc["timestamp"], datetime):
+            doc["timestamp"] = doc["timestamp"].isoformat()
+        
     return results
 
