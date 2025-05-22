@@ -8,7 +8,7 @@ mongo = AsyncMongoClient("mongodb://localhost:27017")
 db = mongo["Elijah"] 
 collection = db["widget_logs"]
 
-@router.get("/api/client_counts")
+@router.get("/client_counts")
 async def get_client_counts():
     pipeline = [
         {
