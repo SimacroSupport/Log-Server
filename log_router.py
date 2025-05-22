@@ -5,7 +5,7 @@ from typing import List
 from datetime import datetime
 import re
 
-router = APIRouter()
+router = APIRouter(prefix="/logs")
 mongo = AsyncMongoClient("mongodb://localhost:27017")
 meta_db = mongo["log_meta"]
 
@@ -18,7 +18,7 @@ class WidgetLog(BaseModel):
 class LogPayload(BaseModel):
     logs: List[WidgetLog]
 
-@router.post("/logs/{server_id}")
+@router.post("/{server_id}")
 async def receive_logs(server_id: str, payload: LogPayload):
     if not re.match(r"^[a-zA-Z0-9_\-.]{1,64}$", server_id):
         return {"status": "error", "message": "Invalid server_id"}
