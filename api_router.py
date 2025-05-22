@@ -9,13 +9,25 @@ mongo = AsyncMongoClient("mongodb://localhost:27017")
 db = mongo["Elijah"] 
 collection = db["widget_logs"]
 
-@router.get("/client_raw_counts")
-async def get_client_raw_counts():
-    cursor = collection.find({}, {"_id": 0, "timestamp": 1, "email": 1, "client_id": 1})
-    docs = await cursor.to_list(length=None)
+@router.get("/widget_usage")
+async def get_widget_usage():
+    pipeline = [
+        { "$project": {
+            "timestamp": 1,
+            "email": 1,
+            "widgets": { "$objectToArray": "$widgets" }
+        }},
+        { "$unwind": "$widgets" },
+        { "$project": {
+            "timestamp": 1,
+            "email": 1,
+            "widget_name": "$widgets.k",
+            "count": "$widgets.v"
+        }},
+        { "$sort": { "timestamp": 1 } }
+    ]
 
-    # group by timestamp + email + client_id (optional)
-    # remove duplicates if necessary
-    # OR: group here into minute buckets if needed
+    cursor = collection.aggregate(pipeline)
+    results = [doc async for doc in cursor]
+    return results
 
-    return docs
