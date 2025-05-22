@@ -26,7 +26,6 @@ async def receive_logs(server_id: str, payload: LogPayload):
 
     db = mongo[server_id]
 
-    # ✅ Time-Series 컬렉션 존재 여부 확인 & 생성
     if "widget_logs" not in await db.list_collection_names():
         try:
             await db.create_collection(
@@ -42,13 +41,11 @@ async def receive_logs(server_id: str, payload: LogPayload):
         except Exception as e:
             return {"status": "error", "message": str(e)}
 
-        # 메타 기록
         await meta_db["servers"].insert_one({
             "server_id": server_id,
             "created_at": datetime.utcnow()
         })
 
-    # ✅ 로그 저장
     logs = [log.dict() for log in payload.logs]
     await db["widget_logs"].insert_many(logs)
 
