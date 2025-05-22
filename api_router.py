@@ -27,7 +27,9 @@ async def get_widget_usage():
         { "$sort": { "timestamp": 1 } }
     ]
 
-    cursor = collection.aggregate(pipeline)
+    cursor = await collection.aggregate(pipeline, allowDiskUse=True)
     results = [doc async for doc in cursor]
+    for doc in results:
+        doc.pop("_id", None)  # 안전하게 제거
     return results
 
