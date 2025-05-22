@@ -11,27 +11,34 @@ collection = db["widget_logs"]
 @router.get("/widget_usage")
 async def get_widget_usage():
     pipeline = [
-        { "$project": {
-            "timestamp": 1,
-            "email": 1,
-            "widgets": { "$objectToArray": "$widgets" }
-        }},
+        {
+            "$project": {
+                "timestamp": 1,
+                "email": 1,
+                "widgets": { "$objectToArray": "$widgets" }
+            }
+        },
         { "$unwind": "$widgets" },
-        { "$project": {
-            "timestamp": 1,
-            "email": 1,
-            "widget_name": "$widgets.k",
-            "count": "$widgets.v"
-        }},
+        {
+            "$project": {
+                "_id": 0,
+                "timestamp": 1,
+                "metric": {
+                    "$concat": ["$email", " / ", "$widgets.k"]
+                },
+                "value": "$widgets.v"
+            }
+        },
         { "$sort": { "timestamp": 1 } }
     ]
 
     cursor = await collection.aggregate(pipeline, allowDiskUse=True)
     results = [doc async for doc in cursor]
     for doc in results:
-        doc.pop("_id", None)  # 안전하게 제거
+        doc.pop("_id", None)
         if isinstance(doc["timestamp"], datetime):
-            doc["timestamp"] = doc["timestamp"].isoformat()
+            doc["timestamp"] = doc["timestamp"].isoformat() + "Z"
+
         
     return results
 
